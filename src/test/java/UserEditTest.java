@@ -1,5 +1,6 @@
 import com.github.javafaker.Faker;
 import org.junit.Before;
+import org.resources.Resources;
 import org.steps.UserSteps;
 import io.qameta.allure.junit4.DisplayName;
 import jdk.jfr.Description;
@@ -79,7 +80,7 @@ public class UserEditTest {
         userSteps.userEdit(userEditRequest)
                 .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.YOU_SHOULD_BE_AUTHORISED));
 
     }
 
@@ -122,7 +123,7 @@ public class UserEditTest {
         userSteps.userEdit(userEditRequest)
                 .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.YOU_SHOULD_BE_AUTHORISED));
 
     }
 
@@ -161,7 +162,7 @@ public class UserEditTest {
         userSteps.userEdit(userEditRequest)
                 .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.YOU_SHOULD_BE_AUTHORISED));
 
     }
 

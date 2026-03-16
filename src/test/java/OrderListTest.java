@@ -1,5 +1,6 @@
 import com.github.javafaker.Faker;
 import org.junit.Before;
+import org.resources.Resources;
 import org.steps.OrderSteps;
 import org.steps.UserSteps;
 
@@ -54,7 +55,7 @@ public class OrderListTest {
         orderSteps.orderList()
                 .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.YOU_SHOULD_BE_AUTHORISED));
     }
 
     @Test

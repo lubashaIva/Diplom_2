@@ -1,5 +1,6 @@
 import com.github.javafaker.Faker;
 import org.junit.Before;
+import org.resources.Resources;
 import org.steps.UserSteps;
 
 import io.qameta.allure.junit4.DisplayName;
@@ -75,7 +76,7 @@ public class UserLoginTest {
         userSteps.userLogin(userWrongLoginRequest)
                 .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.EMAIL_OR_PASSWORD_ARE_INCORRECT));
 
     }
 
@@ -90,7 +91,7 @@ public class UserLoginTest {
         userSteps.userLogin(userWrongLoginRequest)
                 .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.EMAIL_OR_PASSWORD_ARE_INCORRECT));
 
     }
 

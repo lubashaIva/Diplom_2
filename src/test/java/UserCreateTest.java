@@ -1,5 +1,6 @@
 import com.github.javafaker.Faker;
 import org.junit.Before;
+import org.resources.Resources;
 import org.steps.UserSteps;
 
 import io.qameta.allure.junit4.DisplayName;
@@ -66,7 +67,7 @@ public class UserCreateTest {
         userSteps.userCreate(userCreateAndEditRequest)
                 .statusCode(SC_FORBIDDEN)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.USER_ALREADY_EXISTS));
 
     }
 
@@ -81,7 +82,7 @@ public class UserCreateTest {
         userSteps.userCreate(userCreateAndEditRequest)
                 .statusCode(SC_FORBIDDEN)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.REQUIRED_FIELDS));
     }
 
     @Test
@@ -95,7 +96,7 @@ public class UserCreateTest {
         userSteps.userCreate(userCreateAndEditRequest)
                 .statusCode(SC_FORBIDDEN)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.REQUIRED_FIELDS));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class UserCreateTest {
         userSteps.userCreate(userCreateAndEditRequest)
                 .statusCode(SC_FORBIDDEN)
                 .and()
-                .assertThat().body("success", equalTo(false));
+                .assertThat().body("message", equalTo(Resources.REQUIRED_FIELDS));
     }
 
 }
