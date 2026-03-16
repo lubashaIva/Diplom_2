@@ -1,4 +1,5 @@
-import org.Resources.Resources;
+import com.github.javafaker.Faker;
+import org.junit.Before;
 import org.steps.UserSteps;
 
 import io.qameta.allure.junit4.DisplayName;
@@ -8,15 +9,44 @@ import org.junit.Test;
 import org.pojo.UserCreateRequest;
 import org.pojo.UserLoginRequest;
 
+import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class UserLoginTest {
+    private final Faker faker = new Faker();
+    private String email, wrongEmail, name, password, wrongPassword = "";
 
     @After
     public  void deleteUser() {
         UserSteps userSteps = new UserSteps();
-        UserLoginRequest userLoginRequest = new UserLoginRequest(Resources.email, Resources.password);
+        UserLoginRequest userLoginRequest = new UserLoginRequest(email, password);
         userSteps.userDeleteAfterLogin(userLoginRequest);
+        clean();
+    }
+
+    private void clean() {
+        email = "";
+        wrongEmail = "";
+        name = "";
+        password = "";
+        wrongPassword = "";
+    }
+
+    @Before
+    public void setupFaker() {
+        email = faker.internet().emailAddress();
+        wrongEmail = faker.internet().emailAddress();
+        password = faker.internet().password();
+        wrongPassword = faker.internet().password();
+        name = faker.name().firstName();
+        createUser();
+    }
+
+    private void createUser() {
+        UserCreateRequest userCreateRequest = new UserCreateRequest(email, password, name);
+        UserSteps userSteps = new UserSteps();
+
+        userSteps.userCreate(userCreateRequest);
     }
 
     @Test
@@ -24,16 +54,13 @@ public class UserLoginTest {
     @Description("Проверка возможности логина под существующим пользователем")
     public void userLogin() {
 
-        UserCreateRequest userCreateRequest = new UserCreateRequest(Resources.email, Resources.password, Resources.name);
-        UserLoginRequest userLoginRequest = new UserLoginRequest(Resources.email, Resources.password);
+        UserLoginRequest userLoginRequest = new UserLoginRequest(email, password);
         UserSteps userSteps = new UserSteps();
 
-        userSteps.userCreate(userCreateRequest);
-
         userSteps.userLogin(userLoginRequest)
-                .assertThat().body("success", equalTo(true))
+                .statusCode(SC_OK)
                 .and()
-                .statusCode(200);
+                .assertThat().body("success", equalTo(true));
 
     }
 
@@ -42,16 +69,13 @@ public class UserLoginTest {
     @Description("Проверка не возможности логина с неверным email")
     public void userLoginWithWrongEmail() {
 
-        UserCreateRequest userCreateRequest = new UserCreateRequest(Resources.email, Resources.password, Resources.name);
-        UserLoginRequest userWrongLoginRequest = new UserLoginRequest(Resources.wrongEmail, Resources.password);
+        UserLoginRequest userWrongLoginRequest = new UserLoginRequest(wrongEmail, password);
         UserSteps userSteps = new UserSteps();
 
-        userSteps.userCreate(userCreateRequest);
-
         userSteps.userLogin(userWrongLoginRequest)
-                .assertThat().body("success", equalTo(false))
+                .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .statusCode(401);
+                .assertThat().body("success", equalTo(false));
 
     }
 
@@ -60,16 +84,13 @@ public class UserLoginTest {
     @Description("Проверка не возможности входа с неверным поралем")
     public void userLoginWithWrongPassword() {
 
-        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(Resources.email, Resources.password, Resources.name);
-        UserLoginRequest userWrongLoginRequest = new UserLoginRequest(Resources.email, Resources.wrongPassword);
+        UserLoginRequest userWrongLoginRequest = new UserLoginRequest(email, wrongPassword);
         UserSteps userSteps = new UserSteps();
 
-        userSteps.userCreate(userCreateAndEditRequest);
-
         userSteps.userLogin(userWrongLoginRequest)
-                .assertThat().body("success", equalTo(false))
+                .statusCode(SC_UNAUTHORIZED)
                 .and()
-                .statusCode(401);
+                .assertThat().body("success", equalTo(false));
 
     }
 

@@ -1,4 +1,5 @@
-import org.Resources.Resources;
+import com.github.javafaker.Faker;
+import org.junit.Before;
 import org.steps.UserSteps;
 
 import io.qameta.allure.junit4.DisplayName;
@@ -8,34 +9,47 @@ import org.junit.Test;
 import org.pojo.UserCreateRequest;
 import org.pojo.UserLoginRequest;
 
+import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class UserCreateTest {
 
-    private boolean skipDeleteUser = false;
+    private final Faker faker = new Faker();
+    private String email, name, password = "";
 
     @After
-    public void deleteUser() {
-        if (!skipDeleteUser) {
-            UserSteps userSteps = new UserSteps();
-            UserLoginRequest userLoginRequest = new UserLoginRequest(Resources.email, Resources.password);
-            userSteps.userDeleteAfterLogin(userLoginRequest);
-        }
+    public  void deleteUser() {
+        UserSteps userSteps = new UserSteps();
+        UserLoginRequest userLoginRequest = new UserLoginRequest(email, password);
+        userSteps.userDeleteAfterLogin(userLoginRequest);
+        clean();
     }
 
+    private void clean() {
+        email = "";
+        name = "";
+        password = "";
+    }
+
+    @Before
+    public void setupFaker() {
+        email = faker.internet().emailAddress();
+        password = faker.internet().password();
+        name = faker.name().firstName();
+    }
+    
     @Test
     @DisplayName("Создание уникального пользователя")
     @Description("Проверка возможности создать нового уникального пользователя")
     public void createNewUser() {
-        skipDeleteUser = false;
 
-        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(Resources.email, Resources.password, Resources.name);
+        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(email, password, name);
         UserSteps userSteps = new UserSteps();
 
         userSteps.userCreate(userCreateAndEditRequest)
-                .assertThat().body("success", equalTo(true))
+                .statusCode(SC_OK)
                 .and()
-                .statusCode(200);
+                .assertThat().body("success", equalTo(true));
 
     }
 
@@ -43,17 +57,16 @@ public class UserCreateTest {
     @DisplayName("Создание пользователя, который уже зарегистрирован")
     @Description("Проверка не возможности создать пользователя, который уже зарегистрирован")
     public void createDuplicateUser() {
-        skipDeleteUser = false;
 
-        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(Resources.email, Resources.password, Resources.name);
+        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(email, password, name);
         UserSteps userSteps = new UserSteps();
 
         userSteps.userCreate(userCreateAndEditRequest);
 
         userSteps.userCreate(userCreateAndEditRequest)
-                .assertThat().body("success", equalTo(false))
+                .statusCode(SC_FORBIDDEN)
                 .and()
-                .statusCode(403);
+                .assertThat().body("success", equalTo(false));
 
     }
 
@@ -61,48 +74,42 @@ public class UserCreateTest {
     @DisplayName("Создание пользователя без поля email")
     @Description("Проверка не возможности создать пользователя без поля email")
     public void createUserWithoutEmail() {
-
-        skipDeleteUser = true;
-
-        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(null, Resources.password, Resources.name);
+        
+        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(null, password, name);
         UserSteps userSteps = new UserSteps();
 
         userSteps.userCreate(userCreateAndEditRequest)
-                .assertThat().body("success", equalTo(false))
+                .statusCode(SC_FORBIDDEN)
                 .and()
-                .statusCode(403);
+                .assertThat().body("success", equalTo(false));
     }
 
     @Test
     @DisplayName("Создание пользователя без поля password")
     @Description("Проверка не возможности создать пользователя без поля password")
     public void createUserWithoutPassword() {
-
-        skipDeleteUser = true;
-
-        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(Resources.email, null, Resources.name);
+        
+        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(email, null, name);
         UserSteps userSteps = new UserSteps();
 
         userSteps.userCreate(userCreateAndEditRequest)
-                .assertThat().body("success", equalTo(false))
+                .statusCode(SC_FORBIDDEN)
                 .and()
-                .statusCode(403);
+                .assertThat().body("success", equalTo(false));
     }
 
     @Test
     @DisplayName("Создание пользователя без поля name")
     @Description("Проверка не возможности создать пользователя без поля name")
     public void createUserWithoutName() {
-
-        skipDeleteUser = true;
-
-        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(Resources.email, Resources.password, null);
+        
+        UserCreateRequest userCreateAndEditRequest = new UserCreateRequest(email, password, null);
         UserSteps userSteps = new UserSteps();
 
         userSteps.userCreate(userCreateAndEditRequest)
-                .assertThat().body("success", equalTo(false))
+                .statusCode(SC_FORBIDDEN)
                 .and()
-                .statusCode(403);
+                .assertThat().body("success", equalTo(false));
     }
 
 }
